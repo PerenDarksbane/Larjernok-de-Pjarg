@@ -102,6 +102,7 @@ public class Main {
                                 JOptionPane.showMessageDialog(null, "Already newest");
                             } else {
                                 definitions.putAll(newProp);
+                                this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
                                 JOptionPane.showMessageDialog(null, "Update done");
                             }
                         } catch (RuntimeException ex) {
