@@ -89,7 +89,7 @@ public class Main {
                 });
 
                 JMenuItem updateDictionary = new JMenuItem("Check for update");
-                updateDictionary.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK, false));
+                updateDictionary.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK, true));
                 updateDictionary.addActionListener((ActionEvent e) -> {
                     if (!isUpdating) {
                         System.out.println("Update started...");
