@@ -24,6 +24,7 @@
 package com.ymcmp.IDiction;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,6 +35,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -71,12 +73,23 @@ public class Main {
             System.err.println("Fallback using Cross Platform L&F -> Metal");
         }
 
-        new Screen("Custom Spoken Language Translation") {
+        new Screen("Custom Spoken Language Translator", "Plankp") {
             private boolean isUpdating = false;
 
             @Override
             public void postInit() {
+                JMenuItem symaticRules = new JMenuItem("Sematic rules");
+                symaticRules.addActionListener((ActionEvent e) -> {
+                    JOptionPane.showMessageDialog(null, "Here are some rules that can help you from messing up:\n"
+                            + "\"C\" is prononced as \"Ch\" in \"Cheese\" and \"CC\" is pronounced as \"K\"\n"
+                            + "Verbs do not have tenses not conjugation. They are always infinitive and time is what matters\n"
+                            + "Articles of the start of the phrase must be omitted\n"
+                            + "\"The\" does not exist because it is always omitted\n"
+                            + "During speech, \"He\" is always used (not \"She\" or \"It\"). Not during writing however");
+                });
+
                 JMenuItem updateDictionary = new JMenuItem("Check for update");
+                updateDictionary.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK, false));
                 updateDictionary.addActionListener((ActionEvent e) -> {
                     if (!isUpdating) {
                         System.out.println("Update started...");
@@ -95,7 +108,9 @@ public class Main {
                         JOptionPane.showMessageDialog(null, "Already started updating");
                     }
                 });
+
                 this.getHelpMenu().add(updateDictionary);
+                this.getHelpMenu().add(symaticRules);
 
                 this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
@@ -128,6 +143,12 @@ public class Main {
                 sb.append(HTMLDocument(s, tmp + "<br />Words with ` ' do not exist. Mail 'plankp@outlook.com' about it..."));
                 this.setDescriptionPaneText(sb.toString());
             }
+
+            @Override
+            public void creditsItemAction(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, CREDITS);
+            }
+            private static final String CREDITS = "People involved:\nPlankp, Guiu, Jliao";
 
         };
     }

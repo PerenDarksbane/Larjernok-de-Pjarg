@@ -25,6 +25,7 @@ package com.ymcmp.IDiction;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
@@ -40,6 +41,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 
@@ -98,6 +100,7 @@ public abstract class Screen extends JFrame implements WindowListener {
     @SuppressWarnings("unchecked")
     private final JList WordBank = new JList(wordList);
     private final JMenu HelpMenu = new JMenu("Help");
+    private final JMenuItem CreditsItem = new JMenuItem("Created by " + author);
 
     private final JPanel LeftPanel = new JPanel(new BorderLayout());
     private final JTextField SearchField = new JTextField();
@@ -109,7 +112,7 @@ public abstract class Screen extends JFrame implements WindowListener {
     private final JSplitPane SplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, LeftPanel, ScrollBody);
 
     public Screen(String name) {
-        this(name, System.getProperty("user.name", "UNKNOWN"));
+        this(name, "UNKNOWN");
     }
 
     public Screen(String name, String newAuthor) {
@@ -126,9 +129,11 @@ public abstract class Screen extends JFrame implements WindowListener {
 
     private void initializeComponents() {
         //this.MenuBar
-        JMenuItem b = new JMenuItem("Created by " + author);
         this.setJMenuBar(this.MenuBar);
-        this.HelpMenu.add(b);
+        this.CreditsItem.setText("Created by " + author);
+        this.CreditsItem.addActionListener((ActionEvent e) -> creditsItemAction(e));
+        this.CreditsItem.setAccelerator(KeyStroke.getKeyStroke('H', KeyEvent.CTRL_DOWN_MASK, true));
+        this.HelpMenu.add(CreditsItem);
 
         //this.SplitPane
         this.SplitPane.setOneTouchExpandable(true);
@@ -183,6 +188,14 @@ public abstract class Screen extends JFrame implements WindowListener {
 
     public final void setDescriptionPaneText(String s) {
         this.DescriptionPane.setText(s);
+    }
+
+    public final void setCreditsItemAccelerator(KeyStroke ks) {
+        this.CreditsItem.setAccelerator(ks);
+    }
+
+    public void creditsItemAction(ActionEvent e) {
+        //
     }
 
     // Implemented Methods
