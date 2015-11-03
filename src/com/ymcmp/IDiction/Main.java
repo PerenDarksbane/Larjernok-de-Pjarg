@@ -23,12 +23,17 @@
  */
 package com.ymcmp.IDiction;
 
-import java.awt.event.WindowEvent;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -67,8 +72,31 @@ public class Main {
         }
 
         new Screen("Custom Spoken Language Translation") {
+            private boolean isUpdating = false;
+
             @Override
             public void postInit() {
+                JMenuItem updateDictionary = new JMenuItem("Check for update");
+                updateDictionary.addActionListener((ActionEvent e) -> {
+                    if (!isUpdating) {
+                        System.out.println("Update started...");
+                        isUpdating = true;
+                        // Attempts to download from
+                        Properties newProp = readWebProp("https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties");
+                        System.out.println("Applying patch...");
+                        if (definitions.entrySet().equals(newProp.entrySet())) {
+                            JOptionPane.showMessageDialog(null, "Already newest");
+                        } else {
+                            definitions.putAll(newProp);
+                            JOptionPane.showMessageDialog(null, "Update done");
+                        }
+                        isUpdating = false;
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Already started updating");
+                    }
+                });
+                this.getHelpMenu().add(updateDictionary);
+
                 this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
@@ -102,6 +130,19 @@ public class Main {
             }
 
         };
+    }
+
+    private static Properties readWebProp(String rawUrl) {
+        Properties prop = new Properties();
+        try {
+            URL url = new URL(rawUrl);
+            try (InputStreamReader isr = new InputStreamReader(url.openStream())) {
+                prop.load(isr);
+            } // Just for auto close
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+        return prop;
     }
 
     private static String HTMLDocument(String header, String body) {
