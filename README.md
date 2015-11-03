@@ -9,3 +9,4 @@ If you guys want to add vocabulary, email plankp@outlook.com (me) the word and I
 * Articles of the start of the phrase must be omitted
 * "The" does not exist because it is always omitted
 * During speech, "He" is always used (not "She" or "It"). Not during writing however
+* "Pjok" is pronounced like "Peeyok"
