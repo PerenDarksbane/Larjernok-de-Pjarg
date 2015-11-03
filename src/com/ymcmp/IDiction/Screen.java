@@ -93,6 +93,11 @@ public abstract class Screen extends JFrame implements WindowListener {
 
     private final Vector<Object> wordList = new Vector<>();
 
+    @SuppressWarnings("unchecked")
+    public final void refreshWordList() {
+        this.WordBank.setListData(wordList);
+    }
+
     public final Vector<Object> getWordList() {
         return this.wordList;
     }
