@@ -95,13 +95,18 @@ public class Main {
                         System.out.println("Update started...");
                         isUpdating = true;
                         // Attempts to download from
-                        Properties newProp = readWebProp("https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties");
-                        System.out.println("Applying patch...");
-                        if (definitions.entrySet().equals(newProp.entrySet())) {
-                            JOptionPane.showMessageDialog(null, "Already newest");
-                        } else {
-                            definitions.putAll(newProp);
-                            JOptionPane.showMessageDialog(null, "Update done");
+                        try {
+                            Properties newProp = readWebProp("https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties");
+                            System.out.println("Applying patch...");
+                            if (definitions.entrySet().equals(newProp.entrySet())) {
+                                JOptionPane.showMessageDialog(null, "Already newest");
+                            } else {
+                                definitions.putAll(newProp);
+                                JOptionPane.showMessageDialog(null, "Update done");
+                            }
+                        } catch (RuntimeException ex) {
+                            System.out.println("Update failed " + ex.getMessage());
+                            JOptionPane.showMessageDialog(null, "Update failed " + ex.getMessage());
                         }
                         isUpdating = false;
                     } else {
@@ -148,7 +153,7 @@ public class Main {
             public void creditsItemAction(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, CREDITS);
             }
-            private static final String CREDITS = "People involved:\nPlankp, Guiu, Jliao";
+            private static final String CREDITS = "People involved:\nPlankp, Guiu, Jliao, Anexb";
 
         };
     }
