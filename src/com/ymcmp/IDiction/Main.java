@@ -56,13 +56,8 @@ public class Main {
             prop.load(in);
             in.close();
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "Cannot load nessesary files. Force update");
-            System.out.println("Update started...");
-            Properties newProp = readWebProp(FRESH_LIB_SRC);
-            System.out.println("Applying patch...");
-            definitions.clear();
-            definitions.putAll(newProp);
-            JOptionPane.showMessageDialog(null, "Update done");
+            JOptionPane.showMessageDialog(null, "Cannot load nessesary files. Quitting");
+            throw new RuntimeException("Cannot load nessesary files. Quitting");
         }
         definitions.putAll(prop);
     }
