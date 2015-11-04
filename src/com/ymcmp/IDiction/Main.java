@@ -79,8 +79,8 @@ public class Main {
 
             @Override
             public void postInit() {
-                JMenuItem symaticRules = new JMenuItem("Sematic rules");
-                symaticRules.addActionListener((ActionEvent e) -> {
+                JMenuItem sematicRules = new JMenuItem("Sematic rules");
+                sematicRules.addActionListener((ActionEvent e) -> {
                     JOptionPane.showMessageDialog(null, "Here are some rules that can help you from messing up:\n"
                             + "\"C\" is prononced as \"Ch\" in \"Cheese\" and \"CC\" is pronounced as \"K\"\n"
                             + "Verbs do not have tenses not conjugation. They are always infinitive and time is what matters\n"
@@ -89,6 +89,7 @@ public class Main {
                             + "During speech, \"He\" is always used (not \"She\" or \"It\"). Not during writing however\n"
                             + "\"Pjok\" is pronounced like \"Peeyok\"");
                 });
+                sematicRules.setAccelerator(KeyStroke.getKeyStroke('R', KeyEvent.CTRL_DOWN_MASK, true));
 
                 JMenuItem updateDictionary = new JMenuItem("Check for update");
                 updateDictionary.setAccelerator(KeyStroke.getKeyStroke('U', KeyEvent.CTRL_DOWN_MASK, true));
@@ -121,7 +122,7 @@ public class Main {
                 });
 
                 this.getHelpMenu().add(updateDictionary);
-                this.getHelpMenu().add(symaticRules);
+                this.getHelpMenu().add(sematicRules);
 
                 this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
