@@ -184,6 +184,9 @@ public abstract class Screen extends JFrame implements WindowListener {
         if (clearSFDuringQuery) {
             this.SearchField.setText("");
         }
+        if (qs == null) {
+            return;
+        }
         querySearchField(qs);
     }
 

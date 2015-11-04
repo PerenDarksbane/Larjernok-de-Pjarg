@@ -86,7 +86,7 @@ public class Main {
                             + "Verbs do not have tenses not conjugation. They are always infinitive and time is what matters\n"
                             + "Articles of the start of the phrase must be omitted\n"
                             + "\"The\" does not exist because it is always omitted\n"
-                            + "During speech, \"He\" is always used (not \"She\" or \"It\"). Not during writing however"
+                            + "During speech, \"He\" is always used (not \"She\" or \"It\"). Not during writing however\n"
                             + "\"Pjok\" is pronounced like \"Peeyok\"");
                 });
 
