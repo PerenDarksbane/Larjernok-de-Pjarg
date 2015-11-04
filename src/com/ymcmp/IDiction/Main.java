@@ -45,9 +45,9 @@ import javax.swing.UnsupportedLookAndFeelException;
  */
 public class Main {
 
-    private static final String HTML_INDENT = "&nbsp;&nbsp;&nbsp;&nbsp;"; // Four spaces...
     private static final String HTML_HORIZN = "<hr />";
     private static final Map<Object, Object> definitions = new HashMap<>();
+    private static final String FRESH_LIB_SRC = "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties";
 
     static {
         Properties prop = new Properties();
@@ -55,8 +55,14 @@ public class Main {
         try {
             prop.load(in);
             in.close();
-        } catch (java.io.IOException ex) {
-            throw new RuntimeException("Cannot load nessesary files. Quitting");
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Cannot load nessesary files. Force update");
+            System.out.println("Update started...");
+            Properties newProp = readWebProp(FRESH_LIB_SRC);
+            System.out.println("Applying patch...");
+            definitions.clear();
+            definitions.putAll(newProp);
+            JOptionPane.showMessageDialog(null, "Update done");
         }
         definitions.putAll(prop);
     }
@@ -97,11 +103,12 @@ public class Main {
                         isUpdating = true;
                         // Attempts to download from
                         try {
-                            Properties newProp = readWebProp("https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties");
+                            Properties newProp = readWebProp(FRESH_LIB_SRC);
                             System.out.println("Applying patch...");
                             if (definitions.entrySet().equals(newProp.entrySet())) {
                                 JOptionPane.showMessageDialog(null, "Already newest");
                             } else {
+                                definitions.clear();
                                 definitions.putAll(newProp);
                                 this.getWordList().clear();
                                 this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
@@ -190,5 +197,4 @@ public class Main {
         String label = "h" + level + ">";
         return "<" + label + s + "</" + label;
     }
-
 }
