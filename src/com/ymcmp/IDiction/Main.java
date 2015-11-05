@@ -177,6 +177,29 @@ public class Main {
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
             }
 
+            private String appendPjargPlural(char last) {
+                String msg = "";
+                switch (last) {
+                case 's':
+                case 'v':
+                case 'g':
+                    msg += "e";
+                default:
+                    msg += "s";
+                }
+                return msg;
+            }
+
+            private String appendEngPlural(String last) {
+                if (last.equals("us")) {
+                    return "i";
+                }
+                if (last.equals("s") | last.equals("x")) {
+                    return "es";
+                }
+                return "s";
+            }
+
             private void appendText(String txt, StringBuilder sb) {
                 boolean caps = txt.matches("[A-Z].*");
                 txt = txt.toLowerCase();
@@ -185,28 +208,65 @@ public class Main {
                 if (vList != null) {
                     // word exists -- Append it
                     AppendWordQuery(vList, caps, sb);
-                } else {
-                    vList = displayEnglish ? dictionary.getKeys(stmtTxt) : dictionary.getValues(txt);
+                } else if (txt.matches(".+((e?s)|(i))")) {
+                    // Cannot find because of plural?
+                    String txt2 = "";
+                    String stmtTxt2 = "";
+                    if (txt.matches("e?s$")) {
+                        txt2 = txt.split("e?s$")[0];
+                        stmtTxt2 = stmtCase(txt2);
+                    } else if (txt.matches("i$")) {
+                        txt2 = txt.split("i$")[0] + "us";
+                        stmtTxt2 = stmtCase(txt2);
+                    }
+                    vList = displayEnglish ? dictionary.getValues(txt2) : dictionary.getKeys(stmtTxt2);
                     if (vList != null) {
                         // word exists -- Append it
                         AppendWordQuery(vList, caps, sb);
-                    } else {
-                        // word does not exists in both dictionaries
-                        sb.append("`").append(txt).append("'");
+                        if (displayEnglish) {
+                            sb.append(appendPjargPlural(sb.charAt(sb.length() - 1)));
+                        } else {
+                            sb.append(appendEngPlural(sb.substring(sb.length() - 2)));
+                        }
+                    } else { // Checking other dictionary
+                        txt2 = txt.split("s$")[0];
+                        stmtTxt2 = stmtCase(txt2);
+                        vList = displayEnglish ? dictionary.getValues(txt2) : dictionary.getKeys(stmtTxt2);
+                        if (vList != null) {
+                            // word exists -- Append it
+                            AppendWordQuery(vList, caps, sb);
+                            if (displayEnglish) {
+                                sb.append(appendPjargPlural(sb.charAt(sb.length() - 1)));
+                            } else {
+                                sb.append(appendEngPlural(sb.substring(sb.length() - 2)));
+                            }
+                        }
                     }
                 }
-                sb.append(" ");
             }
 
             @Override
             public void querySearchField(String s) {
-                String[] wList = s.trim().split("\\s+|[\\W&&[^-]]+");
+                String[] wList = s.trim().split("\\s+");
+                // Parse: Hello people. -> ["Hello", "people."]
                 StringBuilder sb = new StringBuilder();
                 for (String txt : wList) {
                     if (txt.equals("the")) {
                         continue; // the does not exist
                     }
-                    appendText(txt, sb);
+                    String remain = "";
+                    if (txt.matches(".*\\W")) {
+                        // Parse: help?
+                        int k = txt.length() - 1;
+                        remain += txt.charAt(k);
+                        txt = txt.substring(0, k);
+                    }
+                    if (txt.trim().matches("\\d+(\\.\\d+)?")) {
+                        sb.append(txt);
+                    } else {
+                        appendText(txt, sb);
+                    }
+                    sb.append(remain).append(" ");
                 }
                 String tmp = sb.toString();
                 sb.setLength(0);
@@ -242,7 +302,7 @@ public class Main {
             public void creditsItemAction(ActionEvent e) {
                 JOptionPane.showMessageDialog(null, CREDITS);
             }
-            private static final String CREDITS = "People involved:\nPlankp, Guiu, Jliao, Anexb";
+            private static final String CREDITS = "People involved:\nPlankp, Anexb, Guiu, Ryan, Jliao";
 
         };
     }
