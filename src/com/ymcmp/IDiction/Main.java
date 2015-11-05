@@ -32,8 +32,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+import javax.swing.ButtonGroup;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -85,9 +88,45 @@ public class Main {
 
         new Screen("Custom Spoken Language Translator", "Plankp") {
             private boolean isUpdating = false;
+            private boolean displayEnglish = true;
+
+            private void redrawWordList() {
+                this.getWordList().clear();
+                List<Object> append;
+                if (displayEnglish) {
+                    append = dictionary.getKeys();
+                } else {
+                    append = dictionary.getValues();
+                }
+                this.getWordList().addAll(new TreeSet<>(append));
+                this.refreshWordList();
+            }
 
             @Override
             public void postInit() {
+                ButtonGroup bgroup = new ButtonGroup();
+                JRadioButtonMenuItem displayEng = new JRadioButtonMenuItem("Show English List", true);
+                JRadioButtonMenuItem displayPja = new JRadioButtonMenuItem("Show Pjarg List");
+                bgroup.add(displayEng);
+                bgroup.add(displayPja);
+
+                displayEng.setAccelerator(KeyStroke.getKeyStroke('E', KeyEvent.CTRL_DOWN_MASK, true));
+                displayPja.setAccelerator(KeyStroke.getKeyStroke('P', KeyEvent.CTRL_DOWN_MASK, true));
+
+                displayEng.addActionListener((ActionEvent e) -> {
+                    displayEnglish = true;
+                    redrawWordList();
+                });
+                displayPja.addActionListener((ActionEvent e) -> {
+                    displayEnglish = false;
+                    redrawWordList();
+                });
+
+                JMenu configMenu = new JMenu("Config");
+                configMenu.add(displayEng);
+                configMenu.add(displayPja);
+                this.addMenuToBar(configMenu);
+
                 JMenuItem sematicRules = new JMenuItem("Sematic rules");
                 sematicRules.addActionListener((ActionEvent e) -> {
                     JOptionPane.showMessageDialog(null, "Here are some rules that can help you from messing up:\n"
@@ -108,14 +147,12 @@ public class Main {
                         isUpdating = true;
                         try {
                             dictionary.clear();
-                            this.getWordList().clear();
                             for (String src : FRESH_LIB_SRC) {
                                 Properties newProp = readWebProp(src);
                                 System.out.println("Applying patch...");
                                 dictionary.addAll(newProp);
-                                this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                                redrawWordList();
                             }
-                            this.refreshWordList();
                             JOptionPane.showMessageDialog(null, "Update done");
                         } catch (RuntimeException ex) {
                             System.out.println("Update failed " + ex.getMessage());
@@ -123,8 +160,8 @@ public class Main {
                             System.out.println("Re-invoke init read...");
                             dictionary.addAll(initRead("Library.properties"));
                             dictionary.addAll(initRead("Duplicates.properties"));
-                            this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
-                            this.refreshWordList();
+                            this.getWordList().clear();
+
                         }
                         isUpdating = false;
                     } else {
@@ -140,6 +177,27 @@ public class Main {
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
             }
 
+            private void appendText(String txt, StringBuilder sb) {
+                boolean caps = txt.matches("[A-Z].*");
+                txt = txt.toLowerCase();
+                String stmtTxt = stmtCase(txt);
+                List<Object> vList = displayEnglish ? dictionary.getValues(txt) : dictionary.getKeys(stmtTxt);
+                if (vList != null) {
+                    // word exists -- Append it
+                    AppendWordQuery(vList, caps, sb);
+                } else {
+                    vList = displayEnglish ? dictionary.getKeys(stmtTxt) : dictionary.getValues(txt);
+                    if (vList != null) {
+                        // word exists -- Append it
+                        AppendWordQuery(vList, caps, sb);
+                    } else {
+                        // word does not exists in both dictionaries
+                        sb.append("`").append(txt).append("'");
+                    }
+                }
+                sb.append(" ");
+            }
+
             @Override
             public void querySearchField(String s) {
                 String[] wList = s.trim().split("\\s+|[\\W&&[^-]]+");
@@ -148,21 +206,7 @@ public class Main {
                     if (txt.equals("the")) {
                         continue; // the does not exist
                     }
-                    boolean caps = txt.matches("[A-Z].*");
-                    txt = txt.toLowerCase();
-                    List<Object> vList = dictionary.getValues(txt);
-                    if (vList != null) { // null means nothing is found
-                        AppendWordQuery(vList, caps, sb);
-                    } else {
-                        String stmtTxt = stmtCase(txt);
-                        vList = dictionary.getKeys(stmtTxt);
-                        if (vList != null) { // null means nothing is found
-                            AppendWordQuery(vList, caps, sb);
-                        } else {
-                            sb.append("`").append(txt).append("'");
-                        }
-                    }
-                    sb.append(" ");
+                    appendText(txt, sb);
                 }
                 String tmp = sb.toString();
                 sb.setLength(0);
