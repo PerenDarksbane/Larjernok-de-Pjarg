@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import javax.swing.JMenuItem;
@@ -48,11 +46,21 @@ public class Main {
 
     private static final String HTML_HORIZN = "<hr />";
     private static final Dictionary<Object, Object> dictionary = new Dictionary<>();
-    private static final String FRESH_LIB_SRC = "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties";
+    private static final String[] FRESH_LIB_SRC = {
+        "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties",
+        "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Duplicates.properties"
+    };
 
     static {
+        dictionary.addAll(initRead("Library.properties"));
+        dictionary.addAll(initRead("Duplicates.properties"));
+    }
+
+    private static Properties initRead(String path) throws RuntimeException {
         Properties prop = new Properties();
-        InputStream in = Main.class.getResourceAsStream("Library.properties");
+        InputStream in = Main.class
+                .getResourceAsStream(path);
+
         try {
             prop.load(in);
             in.close();
@@ -60,7 +68,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Cannot load nessesary files. Quitting");
             throw new RuntimeException("Cannot load nessesary files. Quitting");
         }
-        dictionary.addAll(prop);
+        return prop;
     }
 
     /**
@@ -98,19 +106,25 @@ public class Main {
                     if (!isUpdating) {
                         System.out.println("Update started...");
                         isUpdating = true;
-                        // Attempts to download from
                         try {
-                            Properties newProp = readWebProp(FRESH_LIB_SRC);
-                            System.out.println("Applying patch...");
                             dictionary.clear();
-                            dictionary.addAll(newProp);
                             this.getWordList().clear();
-                            this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                            for (String src : FRESH_LIB_SRC) {
+                                Properties newProp = readWebProp(src);
+                                System.out.println("Applying patch...");
+                                dictionary.addAll(newProp);
+                                this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                            }
                             this.refreshWordList();
                             JOptionPane.showMessageDialog(null, "Update done");
                         } catch (RuntimeException ex) {
                             System.out.println("Update failed " + ex.getMessage());
                             JOptionPane.showMessageDialog(null, "Update failed " + ex.getMessage());
+                            System.out.println("Re-invoke init read...");
+                            dictionary.addAll(initRead("Library.properties"));
+                            dictionary.addAll(initRead("Duplicates.properties"));
+                            this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                            this.refreshWordList();
                         }
                         isUpdating = false;
                     } else {
