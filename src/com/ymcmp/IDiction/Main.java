@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -46,7 +47,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class Main {
 
     private static final String HTML_HORIZN = "<hr />";
-    private static final Map<Object, Object> definitions = new HashMap<>();
+    private static final Dictionary<Object, Object> dictionary = new Dictionary<>();
     private static final String FRESH_LIB_SRC = "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties";
 
     static {
@@ -59,7 +60,7 @@ public class Main {
             JOptionPane.showMessageDialog(null, "Cannot load nessesary files. Quitting");
             throw new RuntimeException("Cannot load nessesary files. Quitting");
         }
-        definitions.putAll(prop);
+        dictionary.addAll(prop);
     }
 
     /**
@@ -101,16 +102,12 @@ public class Main {
                         try {
                             Properties newProp = readWebProp(FRESH_LIB_SRC);
                             System.out.println("Applying patch...");
-                            if (definitions.entrySet().equals(newProp.entrySet())) {
-                                JOptionPane.showMessageDialog(null, "Already newest");
-                            } else {
-                                definitions.clear();
-                                definitions.putAll(newProp);
-                                this.getWordList().clear();
-                                this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
-                                this.refreshWordList();
-                                JOptionPane.showMessageDialog(null, "Update done");
-                            }
+                            dictionary.clear();
+                            dictionary.addAll(newProp);
+                            this.getWordList().clear();
+                            this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                            this.refreshWordList();
+                            JOptionPane.showMessageDialog(null, "Update done");
                         } catch (RuntimeException ex) {
                             System.out.println("Update failed " + ex.getMessage());
                             JOptionPane.showMessageDialog(null, "Update failed " + ex.getMessage());
@@ -124,14 +121,14 @@ public class Main {
                 this.getHelpMenu().add(updateDictionary);
                 this.getHelpMenu().add(sematicRules);
 
-                this.getWordList().addAll(new TreeSet<>(definitions.keySet()));
+                this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
             }
 
             @Override
             public void querySearchField(String s) {
-                String[] wList = s.trim().split("\\s+|\\W+");
+                String[] wList = s.trim().split("\\s+|[\\W&&[^-]]+");
                 StringBuilder sb = new StringBuilder();
                 for (String txt : wList) {
                     if (txt.equals("the")) {
@@ -139,14 +136,17 @@ public class Main {
                     }
                     boolean caps = txt.matches("[A-Z].*");
                     txt = txt.toLowerCase();
-                    if (definitions.containsKey(txt)) {
-                        String tmp = definitions.get(txt) + "";
-                        if (!caps) {
-                            tmp = tmp.toLowerCase();
-                        }
-                        sb.append(tmp);
+                    List<Object> vList = dictionary.getValues(txt);
+                    if (vList != null) { // null means nothing is found
+                        AppendWordQuery(vList, caps, sb);
                     } else {
-                        sb.append("`").append(txt).append("'");
+                        String stmtTxt = stmtCase(txt);
+                        vList = dictionary.getKeys(stmtTxt);
+                        if (vList != null) { // null means nothing is found
+                            AppendWordQuery(vList, caps, sb);
+                        } else {
+                            sb.append("`").append(txt).append("'");
+                        }
                     }
                     sb.append(" ");
                 }
@@ -154,6 +154,30 @@ public class Main {
                 sb.setLength(0);
                 sb.append(HTMLDocument(s, tmp + "<br />Words with ` ' do not exist. Mail 'plankp@outlook.com' about it..."));
                 this.setDescriptionPaneText(sb.toString());
+            }
+
+            private void AppendWordQuery(List<Object> vList, boolean caps, StringBuilder sb) {
+                String tmp;
+                if (vList.size() == 1) {
+                    tmp = vList.get(0) + "";
+                    if (!caps) {
+                        tmp = tmp.toLowerCase();
+                    }
+                } else {
+                    tmp = vList + "";
+                }
+                sb.append(tmp);
+            }
+
+            private String stmtCase(String txt) {
+                if (txt == null || txt.length() == 0) {
+                    return txt;
+                }
+                if (txt.length() > 1) {
+                    return ("" + txt.charAt(0)).toUpperCase() + txt.substring(1);
+                } else {
+                    return txt.toUpperCase();
+                }
             }
 
             @Override
