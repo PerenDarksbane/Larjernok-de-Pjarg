@@ -200,26 +200,26 @@ public class Main {
                 return "s";
             }
 
+            private List<Object> getVocab(String txt) {
+                return displayEnglish ? dictionary.getValues(txt) : dictionary.getKeys(stmtCase(txt));
+            }
+
             private void appendText(String txt, StringBuilder sb) {
                 boolean caps = txt.matches("[A-Z].*");
                 txt = txt.toLowerCase();
-                String stmtTxt = stmtCase(txt);
-                List<Object> vList = displayEnglish ? dictionary.getValues(txt) : dictionary.getKeys(stmtTxt);
+                List<Object> vList = getVocab(txt);
                 if (vList != null) {
                     // word exists -- Append it
                     AppendWordQuery(vList, caps, sb);
                 } else if (txt.matches(".+((e?s)|(i))")) {
                     // Cannot find because of plural?
                     String txt2 = "";
-                    String stmtTxt2 = "";
                     if (txt.matches("e?s$")) {
                         txt2 = txt.split("e?s$")[0];
-                        stmtTxt2 = stmtCase(txt2);
-                    } else if (txt.matches("i$")) {
+                    } else if (txt.matches("i$") && displayEnglish) {
                         txt2 = txt.split("i$")[0] + "us";
-                        stmtTxt2 = stmtCase(txt2);
                     }
-                    vList = displayEnglish ? dictionary.getValues(txt2) : dictionary.getKeys(stmtTxt2);
+                    vList = getVocab(txt2);
                     if (vList != null) {
                         // word exists -- Append it
                         AppendWordQuery(vList, caps, sb);
@@ -228,10 +228,9 @@ public class Main {
                         } else {
                             sb.append(appendEngPlural(sb.substring(sb.length() - 2)));
                         }
-                    } else { // Checking other dictionary
+                    } else {
                         txt2 = txt.split("s$")[0];
-                        stmtTxt2 = stmtCase(txt2);
-                        vList = displayEnglish ? dictionary.getValues(txt2) : dictionary.getKeys(stmtTxt2);
+                        vList = getVocab(txt2);
                         if (vList != null) {
                             // word exists -- Append it
                             AppendWordQuery(vList, caps, sb);
@@ -242,6 +241,14 @@ public class Main {
                             }
                         }
                     }
+                } else { // show word not found
+                    sb.append("`");
+                    if (!caps) {
+                        sb.append(txt);
+                    } else {
+                        sb.append(stmtCase(txt));
+                    }
+                    sb.append("'");
                 }
             }
 
@@ -251,7 +258,7 @@ public class Main {
                 // Parse: Hello people. -> ["Hello", "people."]
                 StringBuilder sb = new StringBuilder();
                 for (String txt : wList) {
-                    if (txt.equals("the")) {
+                    if (txt.trim().length() == 0 || txt.equals("the")) {
                         continue; // the does not exist
                     }
                     String remain = "";
