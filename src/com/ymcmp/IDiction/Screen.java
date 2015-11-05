@@ -33,6 +33,7 @@ import java.awt.event.WindowListener;
 import java.util.Vector;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -52,6 +53,26 @@ import javax.swing.event.ListSelectionEvent;
 public abstract class Screen extends JFrame implements WindowListener {
 
     private String author;
+    private final Vector<Object> wordList = new Vector<>();
+    private static final int FRAME_WIDTH = 450;
+    private static final int FRAME_HEIGHT = 300;
+    private boolean clearSFDuringQuery = true;
+
+    private final JMenuBar MenuBar = new JMenuBar();
+
+    @SuppressWarnings("unchecked")
+    private final JList WordBank = new JList(wordList);
+    private final JMenu HelpMenu = new JMenu("Help");
+    private final JMenuItem CreditsItem = new JMenuItem("Created by " + author);
+    private final JPanel LeftPanel = new JPanel(new BorderLayout());
+    private final JTextField SearchField = new JTextField();
+
+    private final JEditorPane DescriptionPane = new JEditorPane();
+    private final JLabel footer = new JLabel();
+
+    private final JScrollPane ScrollWBnk = new JScrollPane(WordBank);
+    private final JScrollPane ScrollBody = new JScrollPane(DescriptionPane);
+    private final JSplitPane SplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, LeftPanel, ScrollBody);
 
     public final String getAuthor() {
         return author;
@@ -60,10 +81,18 @@ public abstract class Screen extends JFrame implements WindowListener {
     public final void setAuthor(String newAuthor) {
         this.author = newAuthor;
     }
-
-    private static final int FRAME_WIDTH = 450;
-    private static final int FRAME_HEIGHT = 300;
-    private boolean clearSFDuringQuery = true;
+    
+    public final void setFooterText(String txt) {
+        this.footer.setText(txt);
+    }
+    
+    public final String getFooterText() {
+        return this.footer.getText();
+    }
+    
+    public final void setFooterTooltip(String txt) {
+        this.footer.setToolTipText(txt);
+    }
 
     public final boolean isClearSFDuringQuery() {
         return clearSFDuringQuery;
@@ -72,8 +101,6 @@ public abstract class Screen extends JFrame implements WindowListener {
     public final void setClearSFDuringQuery(boolean clearSFDuringQuery) {
         this.clearSFDuringQuery = clearSFDuringQuery;
     }
-
-    private final JMenuBar MenuBar = new JMenuBar();
 
     public final static int getFRAME_WIDTH() {
         return FRAME_WIDTH;
@@ -91,30 +118,15 @@ public abstract class Screen extends JFrame implements WindowListener {
         this.MenuBar.add(nmu);
     }
 
-    private final Vector<Object> wordList = new Vector<>();
-
     @SuppressWarnings("unchecked")
     public final void refreshWordList() {
         this.WordBank.setListData(wordList);
+        //"Word count:"
     }
 
     public final Vector<Object> getWordList() {
         return this.wordList;
     }
-
-    @SuppressWarnings("unchecked")
-    private final JList WordBank = new JList(wordList);
-    private final JMenu HelpMenu = new JMenu("Help");
-    private final JMenuItem CreditsItem = new JMenuItem("Created by " + author);
-
-    private final JPanel LeftPanel = new JPanel(new BorderLayout());
-    private final JTextField SearchField = new JTextField();
-
-    private final JEditorPane DescriptionPane = new JEditorPane();
-
-    private final JScrollPane ScrollWBnk = new JScrollPane(WordBank);
-    private final JScrollPane ScrollBody = new JScrollPane(DescriptionPane);
-    private final JSplitPane SplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, LeftPanel, ScrollBody);
 
     public Screen(String name) {
         this(name, "UNKNOWN");
@@ -131,7 +143,7 @@ public abstract class Screen extends JFrame implements WindowListener {
         this.MenuBar.add(HelpMenu);
         this.setVisible(true);
     }
-
+    
     private void initializeComponents() {
         //this.MenuBar
         this.setJMenuBar(this.MenuBar);
@@ -148,6 +160,9 @@ public abstract class Screen extends JFrame implements WindowListener {
         this.LeftPanel.setMinimumSize(spMinDimension);
         this.ScrollBody.setMinimumSize(spMinDimension);
         this.add(SplitPane, BorderLayout.CENTER);
+        
+        //this.footer
+        this.add(this.footer, BorderLayout.SOUTH);
 
         // this.DescriptionPane
         this.DescriptionPane.setEditable(false);
@@ -178,6 +193,7 @@ public abstract class Screen extends JFrame implements WindowListener {
         this.setMinimumSize(d);
         this.setSize(d);
     }
+    private static final int FOOTER_HEIGHT = 10;
 
     private void internalQuery() {
         String qs = this.SearchField.getText();

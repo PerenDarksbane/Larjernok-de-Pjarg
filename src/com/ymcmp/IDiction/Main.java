@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
@@ -98,7 +99,9 @@ public class Main {
                 } else {
                     append = dictionary.getValues();
                 }
-                this.getWordList().addAll(new TreeSet<>(append));
+                Collection<Object> set = new TreeSet<>(append);
+                this.getWordList().addAll(set);
+                this.setFooterText("Word count: " + set.size());
                 this.refreshWordList();
             }
 
@@ -175,6 +178,9 @@ public class Main {
                 this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
+
+                displayEnglish = true;
+                redrawWordList();
             }
 
             private String appendPjargPlural(char last) {
@@ -239,17 +245,24 @@ public class Main {
                             } else {
                                 sb.append(appendEngPlural(sb.substring(sb.length() - 2)));
                             }
+                        } else {
+                            invalidTerm(sb, caps, txt);
                         }
                     }
-                } else { // show word not found
-                    sb.append("`");
-                    if (!caps) {
-                        sb.append(txt);
-                    } else {
-                        sb.append(stmtCase(txt));
-                    }
-                    sb.append("'");
+                } else {
+                    invalidTerm(sb, caps, txt);
                 }
+            }
+
+            private void invalidTerm(StringBuilder sb, boolean caps, String txt) {
+                // show word not found
+                sb.append("`");
+                if (!caps) {
+                    sb.append(txt);
+                } else {
+                    sb.append(stmtCase(txt));
+                }
+                sb.append("'");
             }
 
             @Override
