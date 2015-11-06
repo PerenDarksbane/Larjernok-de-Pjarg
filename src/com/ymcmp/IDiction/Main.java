@@ -270,20 +270,35 @@ public class Main {
                 String[] wList = s.trim().split("\\s+");
                 // Parse: Hello people. -> ["Hello", "people."]
                 StringBuilder sb = new StringBuilder();
+                boolean nextwordCaps = false;
                 for (String txt : wList) {
                     if (txt.trim().length() == 0 || txt.equals("the")) {
                         continue; // the does not exist
                     }
+                    if (txt.equals("The")) {
+                        nextwordCaps = true;
+                        continue;
+                    }
                     String remain = "";
-                    if (txt.matches(".*\\W")) {
+                    if (txt.matches(".*\\W+")) {
                         // Parse: help?
-                        int k = txt.length() - 1;
-                        remain += txt.charAt(k);
-                        txt = txt.substring(0, k);
+                        String[] txtSplit = txt.split("\\W+$");
+                        if (txtSplit.length > 0) {
+                            String splits = txtSplit[0];
+                            remain += txt.substring(txt.length() - splits.length() + 1);
+                            txt = splits;
+                        } else {
+                            sb.append(txt);
+                            continue;
+                        }
                     }
                     if (txt.trim().matches("\\d+(\\.\\d+)?")) {
                         sb.append(txt);
                     } else {
+                        if (nextwordCaps) {
+                            txt = stmtCase(txt);
+                            nextwordCaps = false;
+                        }
                         appendText(txt, sb);
                     }
                     sb.append(remain).append(" ");
