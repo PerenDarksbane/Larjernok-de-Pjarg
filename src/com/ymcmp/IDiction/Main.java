@@ -280,26 +280,31 @@ public class Main {
                         continue;
                     }
                     String remain = "";
-                    if (txt.matches(".*\\W+")) {
+                    if (txt.matches(".*\\W+$")) {
                         // Parse: help?
                         String[] txtSplit = txt.split("\\W+$");
                         if (txtSplit.length > 0) {
                             String splits = txtSplit[0];
-                            remain += txt.substring(txt.length() - splits.length() + 1);
+                            remain += txt.substring(splits.length());
                             txt = splits;
                         } else {
                             sb.append(txt);
                             continue;
                         }
                     }
-                    if (txt.trim().matches("\\d+(\\.\\d+)?")) {
+                    if (txt.trim().matches("\\d+(\\.\\d+)?$")) {
                         sb.append(txt);
                     } else {
                         if (nextwordCaps) {
                             txt = stmtCase(txt);
                             nextwordCaps = false;
                         }
-                        appendText(txt, sb);
+                        if (displayEnglish && (txt.endsWith("'s") || txt.endsWith("s'"))) {
+                            sb.append(txt.substring(0, txt.length() - 2)).append(" ");
+                            appendText(K_APOSTROPHE_S, sb);
+                        } else {
+                            appendText(txt, sb);
+                        }
                     }
                     sb.append(remain).append(" ");
                 }
@@ -308,6 +313,7 @@ public class Main {
                 sb.append(HTMLDocument(s, tmp + "<br />Words with ` ' do not exist. Mail 'plankp@outlook.com' about it..."));
                 this.setDescriptionPaneText(sb.toString());
             }
+            private static final String K_APOSTROPHE_S = "-belong";
 
             private void AppendWordQuery(List<Object> vList, boolean caps, StringBuilder sb) {
                 String tmp;
