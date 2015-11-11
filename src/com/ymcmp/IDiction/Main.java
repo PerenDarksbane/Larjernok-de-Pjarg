@@ -49,15 +49,15 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class Main {
 
     private static final String HTML_HORIZN = "<hr />";
-    private static final Dictionary<Object, Object> dictionary = new Dictionary<>();
+    private static final Dictionary<Object, Object> GLB_DICTIONARY = new Dictionary<>();
     private static final String[] FRESH_LIB_SRC = {
         "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties",
         "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Duplicates.properties"
     };
 
     static {
-        dictionary.addAll(initRead("Library.properties"));
-        dictionary.addAll(initRead("Duplicates.properties"));
+        GLB_DICTIONARY.addAll(initRead("Library.properties"));
+        GLB_DICTIONARY.addAll(initRead("Duplicates.properties"));
     }
 
     private static Properties initRead(String path) throws RuntimeException {
@@ -95,9 +95,9 @@ public class Main {
                 this.getWordList().clear();
                 List<Object> append;
                 if (displayEnglish) {
-                    append = dictionary.getKeys();
+                    append = GLB_DICTIONARY.getKeys();
                 } else {
-                    append = dictionary.getValues();
+                    append = GLB_DICTIONARY.getValues();
                 }
                 Collection<Object> set = new TreeSet<>(append);
                 this.getWordList().addAll(set);
@@ -149,11 +149,11 @@ public class Main {
                         System.out.println("Update started...");
                         isUpdating = true;
                         try {
-                            dictionary.clear();
+                            GLB_DICTIONARY.clear();
                             for (String src : FRESH_LIB_SRC) {
                                 Properties newProp = readWebProp(src);
                                 System.out.println("Applying patch...");
-                                dictionary.addAll(newProp);
+                                GLB_DICTIONARY.addAll(newProp);
                                 redrawWordList();
                             }
                             JOptionPane.showMessageDialog(null, "Update done");
@@ -161,8 +161,8 @@ public class Main {
                             System.out.println("Update failed " + ex.getMessage());
                             JOptionPane.showMessageDialog(null, "Update failed " + ex.getMessage());
                             System.out.println("Re-invoke init read...");
-                            dictionary.addAll(initRead("Library.properties"));
-                            dictionary.addAll(initRead("Duplicates.properties"));
+                            GLB_DICTIONARY.addAll(initRead("Library.properties"));
+                            GLB_DICTIONARY.addAll(initRead("Duplicates.properties"));
                             this.getWordList().clear();
 
                         }
@@ -175,7 +175,7 @@ public class Main {
                 this.getHelpMenu().add(updateDictionary);
                 this.getHelpMenu().add(sematicRules);
 
-                this.getWordList().addAll(new TreeSet<>(dictionary.getKeys()));
+                this.getWordList().addAll(new TreeSet<>(GLB_DICTIONARY.getKeys()));
                 this.setSearchFieldTooltip("Search from list / Trove de largern");
                 this.setDescriptionPaneText(HTMLDocument("Hello", "Welcome to the dictionary!!!") + HTMLDocument("Oi", "Welkomen ga larjernok!!!"));
 
@@ -207,7 +207,7 @@ public class Main {
             }
 
             private List<Object> getVocab(String txt) {
-                return displayEnglish ? dictionary.getValues(txt) : dictionary.getKeys(stmtCase(txt));
+                return displayEnglish ? GLB_DICTIONARY.getValues(txt) : GLB_DICTIONARY.getKeys(stmtCase(txt));
             }
 
             private void appendText(String txt, StringBuilder sb) {
@@ -249,10 +249,17 @@ public class Main {
                             invalidTerm(sb, caps, txt);
                         }
                     }
+                } else if (txt.endsWith(R_PHOBIA) && displayEnglish) {
+                    String fearType = txt.substring(0, txt.length() - R_PHOBIA.length());
+                    System.out.println("--" + fearType);
+                    sb.append(fearType);
+                    AppendWordQuery(getVocab(R_PHOBIA), caps, sb);
+
                 } else {
                     invalidTerm(sb, caps, txt);
                 }
             }
+            private static final String R_PHOBIA = "phobia";
 
             private void invalidTerm(StringBuilder sb, boolean caps, String txt) {
                 // show word not found
