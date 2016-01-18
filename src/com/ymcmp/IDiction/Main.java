@@ -51,8 +51,8 @@ public class Main {
     private static final String HTML_HORIZN = "<hr />";
     private static final Dictionary<Object, Object> GLB_DICTIONARY = new Dictionary<>();
     private static final String[] FRESH_LIB_SRC = {
-        "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Library.properties",
-        "https://raw.githubusercontent.com/plankp/Dictionary/master/src/com/ymcmp/IDiction/Duplicates.properties"
+        "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Library.properties",
+        "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Duplicates.properties"
     };
 
     static {
