@@ -52,12 +52,18 @@ public class Main {
     private static final Dictionary<Object, Object> GLB_DICTIONARY = new Dictionary<>();
     private static final String[] FRESH_LIB_SRC = {
         "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Library.properties",
-        "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Duplicates.properties"
+        "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Duplicates.properties",
+        "https://raw.githubusercontent.com/plankp/Larjernok-de-Pjarg/master/src/com/ymcmp/IDiction/Elements.properties"
     };
 
     static {
+        initLocalRead();
+    }
+
+    private static void initLocalRead() throws RuntimeException {
         GLB_DICTIONARY.addAll(initRead("Library.properties"));
         GLB_DICTIONARY.addAll(initRead("Duplicates.properties"));
+        GLB_DICTIONARY.addAll(initRead("Elements.properties"));
     }
 
     private static Properties initRead(String path) throws RuntimeException {
@@ -161,8 +167,7 @@ public class Main {
                             System.out.println("Update failed " + ex.getMessage());
                             JOptionPane.showMessageDialog(null, "Update failed " + ex.getMessage());
                             System.out.println("Re-invoke init read...");
-                            GLB_DICTIONARY.addAll(initRead("Library.properties"));
-                            GLB_DICTIONARY.addAll(initRead("Duplicates.properties"));
+                            initLocalRead();
                             this.getWordList().clear();
 
                         }
@@ -251,8 +256,7 @@ public class Main {
                     }
                 } else if (txt.endsWith(R_PHOBIA) && displayEnglish) {
                     String fearType = txt.substring(0, txt.length() - R_PHOBIA.length());
-                    System.out.println("--" + fearType);
-                    sb.append(fearType);
+                    AppendWordQuery(getVocab(fearType), caps, sb);
                     AppendWordQuery(getVocab(R_PHOBIA), caps, sb);
 
                 } else {
